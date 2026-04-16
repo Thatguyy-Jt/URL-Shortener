@@ -6,6 +6,8 @@ const config: Config = {
   roots: ['<rootDir>/src'],
   testMatch: ['**/__tests__/**/*.test.ts'],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  // Runs before each test file — sets env vars so env.ts validation passes
+  setupFiles: ['<rootDir>/src/__tests__/setup.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/__tests__/**',
