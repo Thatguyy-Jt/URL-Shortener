@@ -1,7 +1,11 @@
 import dotenv from 'dotenv';
+import path from 'path';
 import { z } from 'zod';
 
-dotenv.config();
+// Resolve the .env file relative to this file's location so the path is
+// always correct regardless of the process working directory or how
+// ts-node-dev spawns child processes.
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const envSchema = z.object({
   NODE_ENV: z
