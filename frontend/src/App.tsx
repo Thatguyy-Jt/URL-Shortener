@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Landing }  from './pages/Landing';
-import { Login }    from './pages/Login';
-import { Register } from './pages/Register';
+import { Landing }   from './pages/Landing';
+import { Login }     from './pages/Login';
+import { Register }  from './pages/Register';
+import { Dashboard } from './pages/Dashboard';
 import type { ReactNode } from 'react';
 
 // ── React Query client ────────────────────────────────────────────────────────
@@ -53,14 +54,7 @@ function AppRoutes() {
       {/* Protected — dashboard and analytics added in next phase */}
       <Route
         path="/dashboard"
-        element={
-          <PrivateRoute>
-            {/* Placeholder until Phase 4 dashboard is built */}
-            <div className="min-h-screen flex items-center justify-center bg-surface-50">
-              <p className="text-surface-500">Dashboard coming in the next phase…</p>
-            </div>
-          </PrivateRoute>
-        }
+        element={<PrivateRoute><Dashboard /></PrivateRoute>}
       />
 
       {/* Catch-all */}
