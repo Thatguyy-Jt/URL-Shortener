@@ -4,7 +4,7 @@
  * PRD requirements verified here:
  *   ✅ 301 redirect to the original URL when the link is active
  *   ✅ 404 when the slug is not found / expired
- *   ✅ Click queue is called (fire-and-forget, never blocks the response)
+ *   ✅ Click recording is called (fire-and-forget, never blocks the response)
  *   ✅ Response time < 100ms (measured in-process — always passes in tests,
  *      but the assertion documents the performance contract)
  */
@@ -13,15 +13,15 @@ import request from 'supertest';
 import { Types } from 'mongoose';
 import app from '../../app';
 import { linkService } from '../../services/linkService';
-import { clickQueue } from '../../queues/clickQueue';
+import { recordClick } from '../../queues/clickQueue';
 
 jest.mock('../../services/linkService');
 jest.mock('../../queues/clickQueue', () => ({
-  clickQueue: { add: jest.fn() },
+  recordClick: jest.fn(),
 }));
 
 const mockLinkService = jest.mocked(linkService);
-const mockClickQueue = clickQueue as jest.Mocked<typeof clickQueue>;
+const mockRecordClick = recordClick as jest.MockedFunction<typeof recordClick>;
 
 // ── Fixture ───────────────────────────────────────────────────────────────────
 
@@ -40,6 +40,10 @@ const mockLink = {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('GET /:slug (redirect)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns 301 and Location header pointing to the original URL', async () => {
     mockLinkService.findActiveLink.mockResolvedValue(mockLink as any);
 
@@ -68,25 +72,25 @@ describe('GET /:slug (redirect)', () => {
     expect(res.status).toBe(404);
   });
 
-  it('calls clickQueue.add() exactly once (fire-and-forget, not awaited)', async () => {
+  it('calls recordClick() exactly once (fire-and-forget, not awaited)', async () => {
     mockLinkService.findActiveLink.mockResolvedValue(mockLink as any);
 
     await request(app).get('/abc123').redirects(0);
 
-    expect(mockClickQueue.add).toHaveBeenCalledTimes(1);
-    expect(mockClickQueue.add).toHaveBeenCalledWith(
+    expect(mockRecordClick).toHaveBeenCalledTimes(1);
+    expect(mockRecordClick).toHaveBeenCalledWith(
       expect.objectContaining({
         linkId: mockLink._id.toString(),
       }),
     );
   });
 
-  it('does NOT call clickQueue.add() when the link is not found', async () => {
+  it('does NOT call recordClick() when the link is not found', async () => {
     mockLinkService.findActiveLink.mockResolvedValue(null);
 
     await request(app).get('/notfound');
 
-    expect(mockClickQueue.add).not.toHaveBeenCalled();
+    expect(mockRecordClick).not.toHaveBeenCalled();
   });
 
   /**

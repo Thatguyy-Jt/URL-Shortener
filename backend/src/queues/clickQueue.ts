@@ -18,41 +18,17 @@ export interface ClickJobData {
   timestamp: string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Shared processor logic ────────────────────────────────────────────────────
 
 function parseDeviceType(type: string | undefined): DeviceType {
-  if (!type) return 'desktop'; // No device type in the UA string = desktop browser
+  if (!type) return 'desktop';
   if (type === 'mobile') return 'mobile';
   if (type === 'tablet') return 'tablet';
   return 'unknown';
 }
 
-// ── Queue ─────────────────────────────────────────────────────────────────────
-
-export const clickQueue = new Bull<ClickJobData>('click-recording', env.REDIS_URL, {
-  defaultJobOptions: {
-    attempts: 3,
-    backoff: { type: 'exponential', delay: 2000 },
-    removeOnComplete: 100, // Keep last 100 completed jobs for debugging
-    removeOnFail: 50,
-  },
-});
-
-/**
- * Queue processor — runs for each click job dequeued from Redis.
- *
- * Runs with concurrency of 5: up to 5 click jobs are processed in parallel.
- * Responsibilities:
- *  1. Parse the User-Agent string into device type + browser name
- *  2. Resolve the IP to country/city (fails silently via geoService)
- *  3. Write the Click document to MongoDB
- *  4. Increment the denormalized Link.clickCount counter
- *
- * This is intentionally decoupled from the redirect path — the HTTP
- * response is sent before this worker even starts.
- */
-clickQueue.process(5, async (job) => {
-  const { linkId, ip, userAgent, referrer, timestamp } = job.data;
+async function processClick(data: ClickJobData): Promise<void> {
+  const { linkId, ip, userAgent, referrer, timestamp } = data;
 
   const parser = new UAParser(userAgent);
   const uaResult = parser.getResult();
@@ -64,32 +40,96 @@ clickQueue.process(5, async (job) => {
   const geo = await getGeoFromIp(ip);
 
   await clickRepository.insert({
-    linkId,
-    ip,
+    linkId, ip,
     country: geo.country,
     city: geo.city,
-    device,
-    browser,
-    referrer,
+    device, browser, referrer,
     timestamp: new Date(timestamp),
   });
 
-  // Atomic increment of the denormalized counter on the Link document
   await linkRepository.incrementClickCount(linkId);
 
   logger.debug(
     { event: 'click_recorded', linkId, country: geo.country, device, browser },
     'Click recorded successfully',
   );
+}
+
+// ── Redis-optional Bull queue ─────────────────────────────────────────────────
+
+/**
+ * `queueHealthy` is `true` only when Redis has confirmed it is ready.
+ * It flips back to `false` any time a connection error fires so we fall
+ * back to direct writes automatically while Redis is down.
+ */
+let queueHealthy = false;
+
+const queue = new Bull<ClickJobData>('click-recording', env.REDIS_URL, {
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: { type: 'exponential', delay: 2000 },
+    removeOnComplete: 100,
+    removeOnFail: 50,
+  },
 });
 
-clickQueue.on('failed', (job, err) => {
+queue.on('ready', () => {
+  queueHealthy = true;
+  logger.info({ event: 'click_queue_ready' }, 'Click queue connected to Redis');
+});
+
+queue.on('error', (err) => {
+  queueHealthy = false;
+  // Log as WARN — Redis is optional; the server continues via direct writes.
+  logger.warn(
+    { event: 'click_queue_unavailable', code: (err as NodeJS.ErrnoException).code },
+    'Redis unavailable — clicks will be written directly to MongoDB',
+  );
+});
+
+queue.process(5, async (job) => {
+  await processClick(job.data);
+});
+
+queue.on('failed', (job, err) => {
   logger.error(
     { event: 'click_job_failed', jobId: job.id, linkId: job.data.linkId, err },
     'Click queue job failed after all retries',
   );
 });
 
-clickQueue.on('error', (err) => {
-  logger.error({ event: 'click_queue_error', err }, 'Click queue connection error');
+// Bull creates two internal ioredis clients (client + eclient/subscriber).
+// If those clients emit 'error' events that are not separately handled,
+// Node.js promotes them to uncaughtException / unhandledRejection.
+// Attach silent error handlers after a tick (clients are created lazily).
+setImmediate(() => {
+  const q = queue as unknown as Record<string, { on?: Function }>;
+  const noop = () => undefined;
+  if (q['client']?.on)  q['client'].on('error', noop);
+  if (q['eclient']?.on) q['eclient'].on('error', noop);
 });
+
+// ── Public API ────────────────────────────────────────────────────────────────
+
+/**
+ * Record a click — fire-and-forget, never throws.
+ *
+ * • Redis healthy  → adds a job to the Bull queue (fast, decoupled from redirect)
+ * • Redis down     → processes the click inline (slightly slower but never lost)
+ */
+export function recordClick(data: ClickJobData): void {
+  if (queueHealthy) {
+    queue.add(data).catch((err) => {
+      logger.warn({ event: 'click_queue_add_failed', err }, 'Queue add failed — falling back to direct write');
+      processClick(data).catch((e) =>
+        logger.error({ event: 'click_direct_write_failed', e }, 'Direct click write also failed'),
+      );
+    });
+    return;
+  }
+
+  // Direct-write path (Redis is down or not yet confirmed ready)
+  processClick(data).catch((err) => {
+    logger.error({ event: 'click_direct_write_failed', err }, 'Click write failed');
+  });
+}

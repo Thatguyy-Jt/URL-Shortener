@@ -35,6 +35,18 @@ async function start(): Promise<void> {
 
   // ── Unhandled errors ───────────────────────────────────────────────────────
   process.on('unhandledRejection', (reason) => {
+    // Redis is an optional service — a connection refusal should never
+    // bring the whole server down.  The click-queue module degrades
+    // gracefully to direct MongoDB writes when Redis is unavailable.
+    const code = (reason as NodeJS.ErrnoException)?.code;
+    if (code === 'ECONNREFUSED') {
+      logger.warn(
+        { event: 'optional_service_unavailable', code },
+        'Connection refused to an optional service (Redis?) — server continues',
+      );
+      return;
+    }
+
     logger.error(
       { event: 'unhandled_rejection', reason },
       'Unhandled promise rejection — shutting down',
