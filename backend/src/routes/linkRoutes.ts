@@ -12,11 +12,11 @@ router.post('/', optionalAuth, linkController.createLink);
 
 // ── Protected (auth required) ─────────────────────────────────────────────────
 router.get('/', authenticate, linkController.getUserLinks);
+// More specific paths must come before the generic /:id route
 router.patch('/:id/deactivate', authenticate, linkController.deactivateLink);
 router.patch('/:id/expiry', authenticate, linkController.updateExpiry);
-router.delete('/:id', authenticate, linkController.deleteLink);
-
-// ── Analytics ─────────────────────────────────────────────────────────────────
 router.get('/:id/analytics', authenticate, analyticsController.getAnalytics);
+router.get('/:id', authenticate, linkController.getLink);
+router.delete('/:id', authenticate, linkController.deleteLink);
 
 export default router;

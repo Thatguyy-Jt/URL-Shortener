@@ -42,4 +42,10 @@ export const authController = {
     const { token, user } = await authService.login(result.data);
     res.status(200).json({ success: true, data: { token, user } });
   }),
+
+  /** Returns the authenticated user's profile — no body needed, user comes from the JWT. */
+  getMe: asyncHandler(async (req: Request, res: Response) => {
+    const user = await authService.getMe(req.user!.userId);
+    res.status(200).json({ success: true, data: { user } });
+  }),
 };

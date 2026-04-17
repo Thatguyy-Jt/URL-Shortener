@@ -52,6 +52,12 @@ export const linkController = {
     res.status(201).json({ success: true, data: link });
   }),
 
+  /** GET /api/links/:id — full details for a single link owned by the user */
+  getLink: asyncHandler(async (req: Request, res: Response) => {
+    const link = await linkService.getLinkById(req.params.id, req.user!.userId);
+    res.json({ success: true, data: link });
+  }),
+
   /** GET /api/links — paginated list of the authenticated user's links */
   getUserLinks: asyncHandler(async (req: Request, res: Response) => {
     const page = Math.max(1, Number(req.query.page) || 1);

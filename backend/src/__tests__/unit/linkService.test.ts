@@ -179,3 +179,47 @@ describe('linkService.findActiveLink', () => {
     expect(await linkService.findActiveLink('abc123')).toEqual(futureLink);
   });
 });
+
+// ── linkService.getLinkById ───────────────────────────────────────────────────
+
+describe('linkService.getLinkById', () => {
+  const ownerId = new Types.ObjectId().toString();
+  const linkId = new Types.ObjectId().toString();
+
+  it('returns the link when it exists and the requesting user owns it', async () => {
+    const ownedLink: ILink = { ...baseLink, userId: new Types.ObjectId(ownerId) };
+    mockRepo.findById.mockResolvedValue(ownedLink);
+
+    const result = await linkService.getLinkById(linkId, ownerId);
+
+    expect(result).toEqual(ownedLink);
+    expect(mockRepo.findById).toHaveBeenCalledWith(linkId);
+  });
+
+  it('throws AppError 404 when the link does not exist', async () => {
+    mockRepo.findById.mockResolvedValue(null);
+
+    await expect(linkService.getLinkById(linkId, ownerId)).rejects.toMatchObject({
+      statusCode: 404,
+    });
+  });
+
+  it('throws AppError 403 when the authenticated user does not own the link', async () => {
+    const differentUser = new Types.ObjectId().toString();
+    const unownedLink: ILink = { ...baseLink, userId: new Types.ObjectId(differentUser) };
+    mockRepo.findById.mockResolvedValue(unownedLink);
+
+    await expect(linkService.getLinkById(linkId, ownerId)).rejects.toMatchObject({
+      statusCode: 403,
+    });
+  });
+
+  it('throws AppError 403 for anonymous links (userId is null)', async () => {
+    const anonymousLink: ILink = { ...baseLink, userId: null };
+    mockRepo.findById.mockResolvedValue(anonymousLink);
+
+    await expect(linkService.getLinkById(linkId, ownerId)).rejects.toMatchObject({
+      statusCode: 403,
+    });
+  });
+});

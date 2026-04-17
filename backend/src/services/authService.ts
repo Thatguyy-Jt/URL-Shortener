@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User';
+import { IUser, User } from '../models/User';
 import { AppError } from '../middleware/errorHandler';
 import { env } from '../config/env';
 
@@ -37,6 +37,18 @@ export const authService = {
 
     const token = signToken({ userId: user._id.toString(), email: user.email });
     return { token, user: safeUser(user) };
+  },
+
+  /**
+   * Fetch the currently authenticated user's profile.
+   * Called by GET /api/auth/me after the JWT is verified.
+   * Re-querying the DB (rather than just returning the JWT payload) ensures
+   * we detect deleted accounts that still have a valid unexpired token.
+   */
+  async getMe(userId: string) {
+    const user = (await User.findById(userId).lean()) as IUser | null;
+    if (!user) throw new AppError('User not found.', 404);
+    return { id: user._id.toString(), email: user.email, name: user.name };
   },
 
   async login(input: { email: string; password: string }) {
