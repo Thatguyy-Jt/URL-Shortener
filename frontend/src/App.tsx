@@ -5,63 +5,62 @@ import { Landing }   from './pages/Landing';
 import { Login }     from './pages/Login';
 import { Register }  from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
+import { Analytics } from './pages/Analytics';
+import { NotFound }  from './pages/NotFound';
 import type { ReactNode } from 'react';
 
 // ── React Query client ────────────────────────────────────────────────────────
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: 1,
-      staleTime: 30_000,
-    },
+    queries: { retry: 1, staleTime: 30_000 },
   },
 });
 
 // ── Route guards ──────────────────────────────────────────────────────────────
 
-/**
- * Redirects unauthenticated users to /login.
- * Shows nothing while the initial session check is running.
- */
+/** Redirects unauthenticated users to /login. Renders nothing during the
+ *  initial /auth/me hydration so there's no flash of wrong content. */
 function PrivateRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return null;
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
-/**
- * Redirects already-authenticated users away from login/register.
- */
+/** Redirects already-authenticated users away from login/register. */
 function PublicOnlyRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return null;
   return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
+// ── Routes ────────────────────────────────────────────────────────────────────
 
 function AppRoutes() {
   return (
     <Routes>
-      {/* Public */}
+      {/* ── Public ── */}
       <Route path="/" element={<Landing />} />
 
-      {/* Auth — redirect away if already logged in */}
+      {/* ── Auth (redirect away if already logged in) ── */}
       <Route path="/login"    element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
 
-      {/* Protected — dashboard and analytics added in next phase */}
-      <Route
-        path="/dashboard"
-        element={<PrivateRoute><Dashboard /></PrivateRoute>}
-      />
+      {/* ── Protected ── */}
+      <Route path="/dashboard" element={
+        <PrivateRoute><Dashboard /></PrivateRoute>
+      } />
+      <Route path="/dashboard/links/:id/analytics" element={
+        <PrivateRoute><Analytics /></PrivateRoute>
+      } />
 
-      {/* Catch-all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* ── 404 ── */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
+
+// ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
   return (

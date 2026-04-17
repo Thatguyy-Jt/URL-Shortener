@@ -23,17 +23,17 @@ export interface ClicksOverTimePoint {
   clicks: number;
 }
 
-export interface BreakdownEntry {
-  label: string;
-  clicks: number;
-}
+// Each breakdown uses the field name the backend actually sends
+export interface CountryEntry  { country: string; clicks: number; }
+export interface DeviceEntry   { device:  string; clicks: number; }
+export interface BrowserEntry  { browser: string; clicks: number; }
 
 export interface LinkAnalytics {
   totalClicks: number;
-  clicksOverTime: ClicksOverTimePoint[];
-  countryBreakdown: BreakdownEntry[];
-  deviceBreakdown: BreakdownEntry[];
-  browserBreakdown: BreakdownEntry[];
+  clicksOverTime:    ClicksOverTimePoint[];
+  countryBreakdown:  CountryEntry[];
+  deviceBreakdown:   DeviceEntry[];
+  browserBreakdown:  BrowserEntry[];
 }
 
 // ── API response wrappers ──────────────────────────────────────────────────────
