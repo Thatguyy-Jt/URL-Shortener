@@ -1,10 +1,23 @@
-// Phase 1 placeholder — full UI built in Phase 5
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Landing } from './pages/Landing';
+
+// Auth + dashboard pages will be added in subsequent phases.
+// Placeholder redirects keep the router complete for the current phase.
+
 function App() {
   return (
-    <div style={{ fontFamily: 'sans-serif', padding: '2rem' }}>
-      <h1>URL Shortener</h1>
-      <p>Frontend scaffold ready — full UI arrives in Phase 5.</p>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        {/* Phase 3 — auth pages */}
+        <Route path="/login"    element={<Navigate to="/" replace />} />
+        <Route path="/register" element={<Navigate to="/" replace />} />
+        {/* Phase 4 — dashboard */}
+        <Route path="/dashboard" element={<Navigate to="/" replace />} />
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
