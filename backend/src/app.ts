@@ -3,8 +3,16 @@ import cors from 'cors';
 import { env } from './config/env';
 import { requestLogger } from './middleware/requestLogger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import authRoutes from './routes/authRoutes';
+import linkRoutes from './routes/linkRoutes';
+import redirectRoutes from './routes/redirectRoutes';
 
 const app = express();
+
+// ── Trust proxy ───────────────────────────────────────────────────────────────
+// Required when deployed behind Render / Nginx so req.ip reflects the real
+// client IP instead of the proxy IP (important for geo-lookup accuracy).
+app.set('trust proxy', 1);
 
 // ── Cross-origin ──────────────────────────────────────────────────────────────
 app.use(
@@ -22,20 +30,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // ── Health check ─────────────────────────────────────────────────────────────
-// Used by Render to verify the service is alive
 app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    environment: env.NODE_ENV,
-  });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), environment: env.NODE_ENV });
 });
 
-// ── API routes (wired in Phase 4) ────────────────────────────────────────────
-// app.use('/api/auth',      authRoutes);
-// app.use('/api/links',     linkRoutes);
-// app.use('/api/analytics', analyticsRoutes);
-// app.use('/:slug',         redirectRoutes);   ← must be last named route
+// ── API routes ────────────────────────────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/links', linkRoutes);
+
+// ── Redirect route — MUST be last so it doesn't shadow /api/* paths ──────────
+app.use('/', redirectRoutes);
 
 // ── 404 + global error handler ───────────────────────────────────────────────
 app.use(notFoundHandler);

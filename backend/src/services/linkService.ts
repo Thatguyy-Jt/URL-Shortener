@@ -116,6 +116,19 @@ export const linkService = {
     if (!deleted) throw new AppError('Link not found or you do not have permission.', 404);
   },
 
+  /**
+   * Fetch a single link by ID, verifying the requesting user owns it.
+   * Used by the analytics controller to gate access to per-link data.
+   */
+  async getLinkById(linkId: string, userId: string): Promise<ILink> {
+    const link = await linkRepository.findById(linkId);
+    if (!link) throw new AppError('Link not found.', 404);
+    if (link.userId?.toString() !== userId) {
+      throw new AppError('You do not have permission to access this link.', 403);
+    }
+    return link;
+  },
+
   /** Update the expiry date. Pass null to remove the expiry entirely. */
   async updateLinkExpiry(
     linkId: string,
