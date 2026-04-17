@@ -47,18 +47,6 @@ function HeroSection() {
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto">
-        {/* Label */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex justify-center mb-6"
-        >
-          <Badge variant="brand" className="bg-brand-500/20 text-brand-300 border border-brand-500/30 px-4 py-1 text-xs backdrop-blur-sm">
-            ✦ Free forever — no credit card required
-          </Badge>
-        </motion.div>
-
         {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 24 }}

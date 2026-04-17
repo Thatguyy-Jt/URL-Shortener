@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Zap } from 'lucide-react';
+import { Logo } from '../ui/Logo';
 
 const TwitterIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
@@ -46,12 +45,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center">
-                <Zap size={16} className="text-white fill-white" />
-              </div>
-              <span className="text-lg font-bold">Sniply</span>
-            </Link>
+            <Logo variant="light" className="mb-4" />
             <p className="text-sm text-white/50 leading-relaxed max-w-xs">
               Shorten, track, and dominate your links. Built for marketers, developers, and teams that care about performance.
             </p>

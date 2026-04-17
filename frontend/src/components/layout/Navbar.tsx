@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { Logo } from '../ui/Logo';
 import { cn } from '../../lib/cn';
+import { Link } from 'react-router-dom';
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'How it works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
 ];
 
 export function Navbar() {
@@ -44,23 +45,7 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <motion.div
-              whileHover={{ rotate: 15 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-brand"
-            >
-              <Zap size={16} className="text-white fill-white" />
-            </motion.div>
-            <span
-              className={cn(
-                'text-lg font-bold tracking-tight',
-                isLanding ? 'text-white' : 'text-surface-900',
-              )}
-            >
-              Sniply
-            </span>
-          </Link>
+          <Logo variant={isLanding ? 'light' : 'dark'} />
 
           {/* Desktop nav links */}
           {isLanding && (
