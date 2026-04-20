@@ -36,12 +36,16 @@ api.interceptors.response.use(
   },
 );
 
-/** Pull the human-readable message out of an Axios error. */
+/** Pull the human-readable message out of an Axios error.
+ *  Backend shape: { success: false, error: { message: string } }
+ */
 export function getApiError(err: unknown): string {
   if (axios.isAxiosError(err)) {
+    const data = err.response?.data;
     return (
-      err.response?.data?.message ??
-      err.response?.data?.error ??
+      data?.error?.message ??          // { error: { message: "..." } }  ← our backend
+      data?.message ??                  // { message: "..." }              ← flat shape
+      (typeof data?.error === 'string' ? data.error : undefined) ??
       err.message
     );
   }
