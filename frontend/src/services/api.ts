@@ -2,8 +2,12 @@ import axios from 'axios';
 
 export const TOKEN_KEY = 'sniply_token';
 
+// In development, Vite proxies /api → localhost:5000 so we use a relative path.
+// In production (or when VITE_API_URL is set), we call the backend directly.
+const API_BASE = (import.meta as unknown as { env: Record<string, string> }).env.VITE_API_URL ?? '/api';
+
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE,
   timeout: 10_000,
   headers: { 'Content-Type': 'application/json' },
 });
