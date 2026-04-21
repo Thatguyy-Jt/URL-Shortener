@@ -91,11 +91,11 @@ export function Register() {
         <Input
           label="Full name"
           type="text"
-          placeholder="Oluwatobi Showale"
+          placeholder="John Doe"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          autoComplete="name"
+          autoComplete="off"
           leftIcon={<UserIcon size={15} />}
         />
 
