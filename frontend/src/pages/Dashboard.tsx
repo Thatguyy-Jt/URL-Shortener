@@ -8,39 +8,54 @@ import { Button } from '../components/ui/Button';
 import { useLinks } from '../hooks/useLinks';
 import { useAuth } from '../hooks/useAuth';
 
-/* ── Stat card ───────────────────────────────────────────────────────────── */
+/* ── Stat card ─────────────────────────────────────────────────────────────── */
 
 interface StatCardProps {
   icon: React.ElementType;
   label: string;
   value: string | number;
   sub?: string;
-  iconBg: string;
-  iconColor: string;
+  gradient: string;
   delay?: number;
 }
 
-function StatCard({ icon: Icon, label, value, sub, iconBg, iconColor, delay = 0 }: StatCardProps) {
+function StatCard({ icon: Icon, label, value, sub, gradient, delay = 0 }: StatCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-      className="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4"
+      transition={{ duration: 0.45, delay, ease: 'easeOut' }}
+      className="relative overflow-hidden bg-white rounded-2xl border border-black/5 p-5 shadow-sm"
     >
-      <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
-        <Icon size={20} className={iconColor} />
+      {/* Colored top line */}
+      <div className={`absolute inset-x-0 top-0 h-[3px] ${gradient}`} />
+
+      <div className="flex items-start justify-between gap-3 pt-1">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-surface-400 mb-2">
+            {label}
+          </p>
+          <p className="text-3xl font-extrabold text-surface-900 leading-none tracking-tight">
+            {value}
+          </p>
+          {sub && (
+            <p className="text-xs text-surface-400 mt-1.5">{sub}</p>
+          )}
+        </div>
+        <div className={`w-10 h-10 rounded-xl ${gradient} flex items-center justify-center shrink-0 opacity-15`}>
+          <Icon size={20} className="text-white" />
+        </div>
       </div>
-      <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-surface-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-surface-900 leading-none">{value}</p>
-        {sub && <p className="text-xs text-surface-400 mt-1">{sub}</p>}
+
+      {/* Icon overlay for contrast */}
+      <div className="absolute top-4 right-4">
+        <Icon size={18} className="text-surface-300" />
       </div>
     </motion.div>
   );
 }
 
-/* ── Page ────────────────────────────────────────────────────────────────── */
+/* ── Page ───────────────────────────────────────────────────────────────────── */
 
 const PAGE_LIMIT = 10;
 
@@ -51,41 +66,56 @@ export function Dashboard() {
 
   const { data, isLoading, isError } = useLinks(page, PAGE_LIMIT);
 
-  const links       = data?.links       ?? [];
-  const total       = data?.total       ?? 0;
-  const totalPages  = data?.totalPages  ?? 1;
+  const links      = data?.links      ?? [];
+  const total      = data?.total      ?? 0;
+  const totalPages = data?.totalPages ?? 1;
 
-  const totalClicks  = links.reduce((sum, l) => sum + l.clickCount, 0);
-  const activeLinks  = links.filter((l) => l.isActive).length;
+  const totalClicks = links.reduce((sum, l) => sum + l.clickCount, 0);
+  const activeLinks = links.filter((l) => l.isActive).length;
+
+  const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   return (
     <DashboardLayout
-      title={`Welcome back, ${user?.name?.split(' ')[0] ?? 'there'} 👋`}
+      title="Dashboard"
       actions={
-        <Button onClick={() => setModalOpen(true)} size="sm">
-          <Plus size={15} />
-          Create link
+        <Button onClick={() => setModalOpen(true)} size="sm" className="gap-1.5">
+          <Plus size={14} />
+          New link
         </Button>
       }
     >
-      {/* ── Stats row ── */}
+      {/* ── Greeting ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-6"
+      >
+        <h2 className="text-xl font-bold text-surface-900">
+          Good {greeting()}, {firstName}
+        </h2>
+        <p className="text-sm text-surface-400 mt-0.5">
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+        </p>
+      </motion.div>
+
+      {/* ── Stats ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard
           icon={Link2}
           label="Total links"
           value={total.toLocaleString()}
           sub="across all pages"
-          iconBg="bg-brand-50"
-          iconColor="text-brand-500"
+          gradient="bg-gradient-to-r from-brand-500 to-violet-500"
           delay={0}
         />
         <StatCard
           icon={MousePointerClick}
-          label="Total clicks"
+          label="Clicks"
           value={totalClicks.toLocaleString()}
           sub="on this page"
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-500"
+          gradient="bg-gradient-to-r from-emerald-400 to-teal-500"
           delay={0.07}
         />
         <StatCard
@@ -93,65 +123,74 @@ export function Dashboard() {
           label="Active links"
           value={activeLinks.toLocaleString()}
           sub="on this page"
-          iconBg="bg-amber-50"
-          iconColor="text-amber-500"
+          gradient="bg-gradient-to-r from-amber-400 to-orange-500"
           delay={0.14}
         />
       </div>
 
       {/* ── Links section ── */}
       <motion.div
-        initial={{ opacity: 0, y: 12 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.22 }}
+        className="bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden"
       >
         {/* Section header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-base font-semibold text-surface-900">Your links</h2>
-            {!isLoading && (
-              <p className="text-sm text-surface-400 mt-0.5">
-                {total === 0
-                  ? 'No links yet'
-                  : `${total} link${total === 1 ? '' : 's'} total`}
-              </p>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-surface-100">
+          <div className="flex items-center gap-3">
+            <h2 className="text-sm font-semibold text-surface-900">Your links</h2>
+            {!isLoading && total > 0 && (
+              <span className="text-xs font-medium text-surface-400 bg-surface-100 px-2 py-0.5 rounded-full">
+                {total}
+              </span>
             )}
           </div>
-          {/* Pagination controls */}
-          {totalPages > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-surface-500">
-                Page {page} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-1.5 rounded-lg text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="p-1.5 rounded-lg text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
+
+          <div className="flex items-center gap-2">
+            {totalPages > 1 && (
+              <>
+                <span className="text-xs text-surface-400 mr-1">
+                  {page} / {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
-        {isError ? (
-          <div className="py-12 text-center text-sm text-red-500">
-            Failed to load links. Please refresh the page.
-          </div>
-        ) : (
-          <LinkTable links={links} isLoading={isLoading} />
-        )}
+        {/* Table body */}
+        <div className="p-2">
+          {isError ? (
+            <div className="py-14 text-center text-sm text-red-400">
+              Failed to load links. Please refresh.
+            </div>
+          ) : (
+            <LinkTable links={links} isLoading={isLoading} />
+          )}
+        </div>
       </motion.div>
 
-      {/* ── Create link modal ── */}
       <CreateLinkModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </DashboardLayout>
   );
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'morning';
+  if (h < 18) return 'afternoon';
+  return 'evening';
 }
