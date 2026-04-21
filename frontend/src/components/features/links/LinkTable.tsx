@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Copy, Check, BarChart2, PowerOff, Trash2,
-  ExternalLink, AlertTriangle, RefreshCw, Link2,
+  ExternalLink, AlertTriangle, RefreshCw,
 } from 'lucide-react';
+import { Badge } from '../../ui/Badge';
 import { useDeactivateLink, useDeleteLink } from '../../../hooks/useLinks';
 import type { Link } from '../../../types';
 
@@ -16,7 +17,7 @@ function shortUrl(slug: string) {
   return `${SHORT_BASE}/${slug}`;
 }
 
-function truncate(str: string, max = 52) {
+function truncate(str: string, max = 48) {
   return str.length > max ? str.slice(0, max) + '…' : str;
 }
 
@@ -30,40 +31,24 @@ function timeAgo(iso: string) {
   return `${d}d ago`;
 }
 
-/* ── Status dot ─────────────────────────────────────────────────────────── */
-
-function StatusDot({ active, expired }: { active: boolean; expired: boolean }) {
-  if (!active) return (
-    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-surface-400 bg-surface-100 px-2 py-0.5 rounded-full">
-      <span className="w-1.5 h-1.5 rounded-full bg-surface-300" />
-      Inactive
-    </span>
-  );
-  if (expired) return (
-    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-      Expired
-    </span>
-  );
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-      Active
-    </span>
-  );
-}
-
 /* ── Single row ─────────────────────────────────────────────────────────── */
 
 function LinkRow({ link }: { link: Link }) {
-  const navigate   = useNavigate();
-  const deactivate = useDeactivateLink();
-  const deleteLink = useDeleteLink();
+  const navigate      = useNavigate();
+  const deactivate    = useDeactivateLink();
+  const deleteLink    = useDeleteLink();
 
   const [copied,     setCopied]     = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
 
-  const isExpired = link.expiresAt != null && new Date(link.expiresAt) < new Date();
+  const isExpired =
+    link.expiresAt != null && new Date(link.expiresAt) < new Date();
+
+  const statusBadge = !link.isActive
+    ? <Badge variant="neutral">Inactive</Badge>
+    : isExpired
+      ? <Badge variant="warning">Expired</Badge>
+      : <Badge variant="success">Active</Badge>;
 
   function handleCopy() {
     navigator.clipboard.writeText(shortUrl(link.slug)).then(() => {
@@ -80,143 +65,161 @@ function LinkRow({ link }: { link: Link }) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -16 }}
-      transition={{ duration: 0.22 }}
-      className="group relative flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3.5 rounded-xl hover:bg-surface-50 transition-colors duration-150"
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.25 }}
+      className="group bg-white border border-surface-200 rounded-2xl px-5 py-4 hover:border-brand-200 hover:shadow-md transition-all duration-200"
     >
-      {/* Left: icon + URLs */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Link icon */}
-        <div className="w-8 h-8 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0">
-          <Link2 size={13} className="text-brand-400" />
-        </div>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
 
-        <div className="min-w-0 flex-1">
-          {/* Slug row */}
-          <div className="flex items-center gap-2 flex-wrap">
+        {/* Left: URLs + meta */}
+        <div className="flex-1 min-w-0 space-y-1">
+          {/* Short URL row */}
+          <div className="flex items-center gap-2">
             <a
               href={shortUrl(link.slug)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-bold text-brand-600 hover:text-brand-700 font-mono flex items-center gap-1 transition-colors leading-none"
+              className="text-sm font-semibold text-brand-600 hover:text-brand-700 font-mono flex items-center gap-1 transition-colors"
             >
               {link.slug}
-              <ExternalLink size={10} className="opacity-40" />
+              <ExternalLink size={11} className="opacity-50" />
             </a>
 
+            {/* Copy button */}
             <button
               onClick={handleCopy}
               title="Copy short link"
-              className="w-5 h-5 rounded-md flex items-center justify-center text-surface-300 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+              className="p-1 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
             >
               {copied
-                ? <Check size={11} className="text-emerald-500" />
-                : <Copy size={11} />}
+                ? <Check size={13} className="text-emerald-500" />
+                : <Copy size={13} />
+              }
             </button>
 
-            <StatusDot active={link.isActive} expired={isExpired} />
+            {statusBadge}
+
+            {link.expiresAt && !isExpired && (
+              <span className="text-[10px] text-surface-400 hidden sm:inline">
+                Expires {new Date(link.expiresAt).toLocaleDateString()}
+              </span>
+            )}
           </div>
 
           {/* Original URL */}
-          <p className="text-[11px] text-surface-400 mt-1 truncate" title={link.originalUrl}>
+          <p
+            className="text-xs text-surface-400 truncate"
+            title={link.originalUrl}
+          >
             {truncate(link.originalUrl)}
           </p>
         </div>
-      </div>
 
-      {/* Right: stats + actions */}
-      <div className="flex items-center gap-4 pl-11 sm:pl-0 shrink-0">
-        {/* Click count */}
-        <div className="text-center hidden sm:block min-w-[48px]">
-          <p className="text-base font-bold text-surface-800 leading-none tabular-nums">
-            {link.clickCount.toLocaleString()}
+        {/* Right: stats + actions */}
+        <div className="flex items-center gap-4 shrink-0">
+          {/* Clicks */}
+          <div className="text-center hidden sm:block">
+            <p className="text-lg font-bold text-surface-900 leading-none">
+              {link.clickCount.toLocaleString()}
+            </p>
+            <p className="text-[10px] text-surface-400 mt-0.5">clicks</p>
+          </div>
+
+          {/* Created date */}
+          <p className="text-xs text-surface-400 hidden md:block w-14 text-right">
+            {timeAgo(link.createdAt)}
           </p>
-          <p className="text-[9px] font-semibold uppercase tracking-wide text-surface-300 mt-0.5">clicks</p>
-        </div>
 
-        {/* Time */}
-        <p className="text-[11px] text-surface-300 hidden md:block w-12 text-right tabular-nums">
-          {timeAgo(link.createdAt)}
-        </p>
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            {/* Analytics */}
+            <button
+              onClick={() => navigate(`/dashboard/links/${link._id}/analytics`)}
+              title="View analytics"
+              className="p-2 rounded-xl text-surface-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+            >
+              <BarChart2 size={15} />
+            </button>
 
-        {/* Actions — always visible on mobile, hover on desktop */}
-        <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-150">
-          <button
-            onClick={() => navigate(`/dashboard/links/${link._id}/analytics`)}
-            title="View analytics"
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
-          >
-            <BarChart2 size={13} />
-          </button>
+            {/* Deactivate / Reactivate */}
+            <button
+              onClick={() => deactivate.mutate(link._id)}
+              disabled={deactivate.isPending || !link.isActive}
+              title={link.isActive ? 'Deactivate link' : 'Already inactive'}
+              className="p-2 rounded-xl text-surface-400 hover:text-amber-500 hover:bg-amber-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              {deactivate.isPending
+                ? <RefreshCw size={15} className="animate-spin" />
+                : <PowerOff size={15} />
+              }
+            </button>
 
-          <button
-            onClick={() => deactivate.mutate(link._id)}
-            disabled={deactivate.isPending || !link.isActive}
-            title={link.isActive ? 'Deactivate' : 'Already inactive'}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-amber-500 hover:bg-amber-50 transition-colors disabled:opacity-25 disabled:cursor-not-allowed"
-          >
-            {deactivate.isPending
-              ? <RefreshCw size={13} className="animate-spin" />
-              : <PowerOff size={13} />}
-          </button>
-
-          <AnimatePresence mode="wait">
-            {confirmDel ? (
-              <motion.div
-                key="confirm"
-                initial={{ opacity: 0, scale: 0.9, width: 0 }}
-                animate={{ opacity: 1, scale: 1, width: 'auto' }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="flex items-center gap-1 bg-red-50 border border-red-100 rounded-lg px-2 py-1 ml-1"
-              >
-                <AlertTriangle size={10} className="text-red-400 shrink-0" />
-                <button onClick={handleDelete} className="text-[10px] font-bold text-red-500 hover:text-red-600 px-0.5">
-                  Delete
-                </button>
-                <span className="text-surface-300 text-[10px]">·</span>
-                <button onClick={() => setConfirmDel(false)} className="text-[10px] text-surface-400 hover:text-surface-600 px-0.5">
-                  Cancel
-                </button>
-              </motion.div>
-            ) : (
-              <motion.button
-                key="del-btn"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setConfirmDel(true)}
-                title="Delete"
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-              >
-                <Trash2 size={13} />
-              </motion.button>
-            )}
-          </AnimatePresence>
+            {/* Delete */}
+            <AnimatePresence mode="wait">
+              {confirmDel ? (
+                <motion.div
+                  key="confirm"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-xl px-2 py-1"
+                >
+                  <AlertTriangle size={12} className="text-red-500 shrink-0" />
+                  <span className="text-[11px] text-red-600 font-medium">Delete?</span>
+                  <button
+                    onClick={handleDelete}
+                    className="text-[11px] font-bold text-red-600 hover:text-red-700 px-1"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => setConfirmDel(false)}
+                    className="text-[11px] text-surface-400 hover:text-surface-600 px-1"
+                  >
+                    No
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  key="delete-btn"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setConfirmDel(true)}
+                  title="Delete link"
+                  className="p-2 rounded-xl text-surface-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 size={15} />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>
   );
 }
 
-/* ── Skeleton ───────────────────────────────────────────────────────────── */
+/* ── Skeleton loader ────────────────────────────────────────────────────── */
 
 function LinkSkeleton() {
   return (
-    <div className="flex items-center gap-3 px-4 py-3.5 animate-pulse">
-      <div className="w-8 h-8 rounded-lg bg-surface-100 shrink-0" />
-      <div className="flex-1 space-y-2 min-w-0">
-        <div className="h-3.5 bg-surface-100 rounded w-28" />
-        <div className="h-2.5 bg-surface-100 rounded w-56" />
+    <div className="bg-white border border-surface-200 rounded-2xl px-5 py-4 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-surface-100 rounded w-32" />
+          <div className="h-3 bg-surface-100 rounded w-64" />
+        </div>
+        <div className="h-8 w-24 bg-surface-100 rounded-xl hidden sm:block" />
+        <div className="h-8 w-20 bg-surface-100 rounded-xl hidden md:block" />
       </div>
-      <div className="h-6 w-16 bg-surface-100 rounded-lg hidden sm:block" />
-      <div className="h-6 w-20 bg-surface-100 rounded-lg hidden md:block" />
     </div>
   );
 }
 
-/* ── Table ──────────────────────────────────────────────────────────────── */
+/* ── Table (exported) ───────────────────────────────────────────────────── */
 
 interface LinkTableProps {
   links: Link[];
@@ -227,7 +230,7 @@ interface LinkTableProps {
 export function LinkTable({ links, isLoading, emptyMessage }: LinkTableProps) {
   if (isLoading) {
     return (
-      <div className="divide-y divide-surface-100">
+      <div className="space-y-3">
         {[1, 2, 3, 4].map((i) => <LinkSkeleton key={i} />)}
       </div>
     );
@@ -235,22 +238,22 @@ export function LinkTable({ links, isLoading, emptyMessage }: LinkTableProps) {
 
   if (links.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-50 to-violet-50 border border-brand-100 flex items-center justify-center mb-4">
-          <Link2 size={20} className="text-brand-300" />
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-surface-100 flex items-center justify-center mb-4">
+          <ExternalLink size={24} className="text-surface-300" />
         </div>
-        <p className="text-sm font-semibold text-surface-700 mb-1">
+        <p className="text-sm font-medium text-surface-700 mb-1">
           {emptyMessage ?? 'No links yet'}
         </p>
-        <p className="text-xs text-surface-400">
-          Click <span className="font-medium text-brand-500">New link</span> to create your first short URL.
+        <p className="text-sm text-surface-400">
+          Create your first short link to get started.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-surface-100">
+    <div className="space-y-3">
       <AnimatePresence initial={false}>
         {links.map((link) => (
           <LinkRow key={link._id} link={link} />

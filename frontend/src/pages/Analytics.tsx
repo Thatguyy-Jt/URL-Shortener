@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, MousePointerClick, Smartphone,
-  TrendingUp, AlertCircle, BarChart3,
+  TrendingUp, AlertCircle,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -14,7 +14,7 @@ import type { CountryEntry, DeviceEntry, BrowserEntry } from '../types';
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
 
-const PALETTE = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'];
+const BRAND_COLORS = ['#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff', '#eef2ff'];
 
 function fmt(date: string) {
   return new Date(date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' });
@@ -25,33 +25,33 @@ function pct(value: number, total: number) {
   return `${Math.round((value / total) * 100)}%`;
 }
 
-/* ─── Stat card ─────────────────────────────────────────────────────────── */
+/* ─── Stat card ──────────────────────────────────────────────────────────── */
 
 interface StatCardProps {
   icon: React.ElementType;
   label: string;
   value: string | number;
   sub?: string;
-  gradient: string;
+  iconBg: string;
+  iconColor: string;
   delay?: number;
 }
 
-function StatCard({ icon: Icon, label, value, sub, gradient, delay = 0 }: StatCardProps) {
+function StatCard({ icon: Icon, label, value, sub, iconBg, iconColor, delay = 0 }: StatCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="relative overflow-hidden bg-white rounded-2xl border border-black/5 p-5 shadow-sm"
+      className="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4"
     >
-      <div className={`absolute inset-x-0 top-0 h-[3px] ${gradient}`} />
-      <div className="pt-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.13em] text-surface-400 mb-2">{label}</p>
-        <p className="text-3xl font-extrabold text-surface-900 leading-none tracking-tight">{value}</p>
-        {sub && <p className="text-xs text-surface-400 mt-1.5">{sub}</p>}
+      <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
+        <Icon size={20} className={iconColor} />
       </div>
-      <div className="absolute top-4 right-4 opacity-8">
-        <Icon size={28} className="text-surface-200" />
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-widest text-surface-400 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-surface-900 leading-none">{value}</p>
+        {sub && <p className="text-xs text-surface-400 mt-1 truncate max-w-[140px]">{sub}</p>}
       </div>
     </motion.div>
   );
@@ -66,14 +66,14 @@ function AreaTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-surface-900 text-white text-xs rounded-xl px-3.5 py-2.5 shadow-2xl border border-white/10">
-      <p className="text-white/50 mb-0.5">{label && fmt(label)}</p>
-      <p className="font-bold text-brand-300 text-sm">{payload[0].value?.toLocaleString()} clicks</p>
+    <div className="bg-surface-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl">
+      <p className="font-semibold mb-0.5">{label && fmt(label)}</p>
+      <p className="text-brand-300">{payload[0].value?.toLocaleString()} clicks</p>
     </div>
   );
 }
 
-/* ─── Clicks chart ───────────────────────────────────────────────────────── */
+/* ─── Clicks over time chart ─────────────────────────────────────────────── */
 
 function ClicksChart({ data }: { data: { date: string; count: number }[] }) {
   const hasData = data.some((d) => d.count > 0);
@@ -83,71 +83,58 @@ function ClicksChart({ data }: { data: { date: string; count: number }[] }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm"
     >
-      <div className="px-6 pt-5 pb-4 border-b border-surface-100 flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold text-surface-900">Click activity</h3>
-          <p className="text-[11px] text-surface-400 mt-0.5">Last 30 days</p>
-        </div>
-        <div className="w-8 h-8 rounded-lg bg-brand-50 border border-brand-100 flex items-center justify-center">
-          <BarChart3 size={14} className="text-brand-400" />
-        </div>
-      </div>
+      <h3 className="text-sm font-semibold text-surface-900 mb-5">Clicks over time (30 days)</h3>
 
-      <div className="p-4 pt-5">
-        {!hasData ? (
-          <div className="flex flex-col items-center justify-center h-44 text-center">
-            <TrendingUp size={28} className="text-surface-200 mb-3" />
-            <p className="text-sm font-medium text-surface-400">No clicks yet</p>
-            <p className="text-xs text-surface-300 mt-1">Share your link to start tracking.</p>
-          </div>
-        ) : (
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={data} margin={{ top: 4, right: 4, left: -28, bottom: 0 }}>
-              <defs>
-                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#6366f1" stopOpacity={0.2} />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="2 4" stroke="#f1f5f9" vertical={false} />
-              <XAxis
-                dataKey="date"
-                tickFormatter={fmt}
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
-                tickLine={false}
-                axisLine={false}
-                interval={5}
-              />
-              <YAxis
-                allowDecimals={false}
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                content={<AreaTooltip />}
-                cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '3 3' }}
-              />
-              <Area
-                type="monotone"
-                dataKey="count"
-                stroke="#6366f1"
-                strokeWidth={2}
-                fill="url(#areaGrad)"
-                dot={false}
-                activeDot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
-      </div>
+      {!hasData ? (
+        <div className="flex flex-col items-center justify-center h-48 text-center">
+          <TrendingUp size={28} className="text-surface-200 mb-3" />
+          <p className="text-sm text-surface-400">No clicks recorded yet.</p>
+          <p className="text-xs text-surface-300 mt-1">Share your link to start tracking.</p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={220}>
+          <AreaChart data={data} margin={{ top: 4, right: 8, left: -24, bottom: 0 }}>
+            <defs>
+              <linearGradient id="clickGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickFormatter={fmt}
+              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tickLine={false}
+              axisLine={false}
+              interval={4}
+            />
+            <YAxis
+              allowDecimals={false}
+              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tickLine={false}
+              axisLine={false}
+            />
+            <Tooltip content={<AreaTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }} />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="#6366f1"
+              strokeWidth={2.5}
+              fill="url(#clickGrad)"
+              dot={false}
+              activeDot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
     </motion.div>
   );
 }
 
-/* ─── Breakdown chart ────────────────────────────────────────────────────── */
+/* ─── Breakdown bar chart ────────────────────────────────────────────────── */
 
 function BreakdownChart({
   title,
@@ -167,43 +154,39 @@ function BreakdownChart({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl border border-black/5 shadow-sm overflow-hidden"
+      className="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm"
     >
-      <div className="px-5 pt-4 pb-3 border-b border-surface-100">
-        <h3 className="text-sm font-semibold text-surface-900">{title}</h3>
-      </div>
+      <h3 className="text-sm font-semibold text-surface-900 mb-5">{title}</h3>
 
-      <div className="p-5">
-        {top.length === 0 ? (
-          <div className="flex items-center justify-center h-28 text-xs text-surface-300">
-            No data yet
-          </div>
-        ) : (
-          <div className="space-y-3.5">
-            {top.map((item, i) => (
-              <div key={item.name}>
-                <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="text-surface-700 font-medium truncate max-w-[55%]">
-                    {item.name || 'Unknown'}
-                  </span>
-                  <span className="text-surface-400 tabular-nums text-[11px]">
-                    {item.count.toLocaleString()} · <span className="font-semibold text-surface-600">{pct(item.count, total)}</span>
-                  </span>
-                </div>
-                <div className="h-1.5 rounded-full bg-surface-100 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: pct(item.count, total) }}
-                    transition={{ duration: 0.8, delay: delay + i * 0.06, ease: 'easeOut' }}
-                    className="h-full rounded-full"
-                    style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
-                  />
-                </div>
+      {top.length === 0 ? (
+        <div className="flex items-center justify-center h-36 text-sm text-surface-300">
+          No data yet
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {top.map((item, i) => (
+            <div key={item.name} className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-surface-700 font-medium truncate max-w-[60%]">
+                  {item.name || 'Unknown'}
+                </span>
+                <span className="text-surface-400 tabular-nums">
+                  {item.count.toLocaleString()} · {pct(item.count, total)}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div className="h-1.5 rounded-full bg-surface-100 overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: pct(item.count, total) }}
+                  transition={{ duration: 0.7, delay: delay + i * 0.05, ease: 'easeOut' }}
+                  className="h-full rounded-full"
+                  style={{ backgroundColor: BRAND_COLORS[i % BRAND_COLORS.length] }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -213,16 +196,13 @@ function BreakdownChart({
 function AnalyticsSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[1,2,3].map(i => (
-          <div key={i} className="h-24 bg-white rounded-2xl border border-black/5" />
-        ))}
+      <div className="h-20 bg-white rounded-2xl border border-surface-100" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1,2,3,4].map(i => <div key={i} className="h-24 bg-white rounded-2xl border border-surface-100" />)}
       </div>
-      <div className="h-72 bg-white rounded-2xl border border-black/5" />
+      <div className="h-64 bg-white rounded-2xl border border-surface-100" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1,2,3].map(i => (
-          <div key={i} className="h-52 bg-white rounded-2xl border border-black/5" />
-        ))}
+        {[1,2,3].map(i => <div key={i} className="h-52 bg-white rounded-2xl border border-surface-100" />)}
       </div>
     </div>
   );
@@ -232,16 +212,23 @@ function AnalyticsSkeleton() {
 
 export function Analytics() {
   const { id = '' } = useParams<{ id: string }>();
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
   const { data, isLoading, isError } = useAnalytics(id);
 
-  const countries = (data?.countries ?? []).map((e: CountryEntry) => ({ name: e.country, count: e.count }));
-  const devices   = (data?.devices   ?? []).map((e: DeviceEntry)  => ({ name: e.device,  count: e.count }));
-  const browsers  = (data?.browsers  ?? []).map((e: BrowserEntry) => ({ name: e.browser, count: e.count }));
+  // Normalise breakdown arrays to { name, count }
+  const countries = (data?.countries ?? []).map((e: CountryEntry) => ({
+    name: e.country, count: e.count,
+  }));
+  const devices = (data?.devices ?? []).map((e: DeviceEntry) => ({
+    name: e.device, count: e.count,
+  }));
+  const browsers = (data?.browsers ?? []).map((e: BrowserEntry) => ({
+    name: e.browser, count: e.count,
+  }));
 
   const total     = data?.totalClicks ?? 0;
-  const topDevice = devices[0]?.name ?? '—';
-  const peakDay   = data?.clicksOverTime
+  const topDevice = devices[0]?.name  ?? '—';
+  const peakDay    = data?.clicksOverTime
     .reduce((best, d) => (d.count > best.count ? d : best), { date: '', count: 0 });
 
   return (
@@ -250,10 +237,10 @@ export function Analytics() {
       actions={
         <button
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-1.5 text-xs font-medium text-surface-500 hover:text-surface-900 bg-white border border-surface-200 rounded-lg px-3 py-1.5 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-surface-500 hover:text-surface-900 transition-colors"
         >
-          <ArrowLeft size={13} />
-          Back
+          <ArrowLeft size={15} />
+          Back to links
         </button>
       }
     >
@@ -261,16 +248,14 @@ export function Analytics() {
 
       {isError && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mb-4">
-            <AlertCircle size={22} className="text-red-400" />
-          </div>
-          <p className="text-sm font-semibold text-surface-700 mb-1">Failed to load analytics</p>
-          <p className="text-xs text-surface-400">Make sure you own this link and try again.</p>
+          <AlertCircle size={32} className="text-red-400 mb-3" />
+          <p className="text-sm font-medium text-surface-700 mb-1">Failed to load analytics</p>
+          <p className="text-sm text-surface-400">Make sure you own this link and try again.</p>
         </div>
       )}
 
       {data && (
-        <div className="space-y-5 max-w-5xl">
+        <div className="space-y-6 max-w-6xl">
 
           {/* ── Stat cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -278,7 +263,8 @@ export function Analytics() {
               icon={MousePointerClick}
               label="Total clicks"
               value={total.toLocaleString()}
-              gradient="bg-gradient-to-r from-brand-500 to-violet-500"
+              iconBg="bg-brand-50"
+              iconColor="text-brand-500"
               delay={0}
             />
             <StatCard
@@ -286,27 +272,29 @@ export function Analytics() {
               label="Peak day"
               value={peakDay?.count ?? 0}
               sub={peakDay?.date ? fmt(peakDay.date) : 'No data'}
-              gradient="bg-gradient-to-r from-emerald-400 to-teal-500"
-              delay={0.07}
+              iconBg="bg-emerald-50"
+              iconColor="text-emerald-500"
+              delay={0.06}
             />
             <StatCard
               icon={Smartphone}
               label="Top device"
               value={topDevice}
               sub={devices[0] ? `${devices[0].count} clicks` : undefined}
-              gradient="bg-gradient-to-r from-amber-400 to-orange-500"
-              delay={0.14}
+              iconBg="bg-violet-50"
+              iconColor="text-violet-500"
+              delay={0.12}
             />
           </div>
 
           {/* ── Clicks over time ── */}
           <ClicksChart data={data.clicksOverTime} />
 
-          {/* ── Breakdowns ── */}
+          {/* ── Breakdown charts ── */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <BreakdownChart title="Countries" data={countries} total={total} delay={0.25} />
-            <BreakdownChart title="Devices"   data={devices}   total={total} delay={0.30} />
-            <BreakdownChart title="Browsers"  data={browsers}  total={total} delay={0.35} />
+            <BreakdownChart title="Countries"  data={countries} total={total} delay={0.25} />
+            <BreakdownChart title="Devices"    data={devices}   total={total} delay={0.30} />
+            <BreakdownChart title="Browsers"   data={browsers}  total={total} delay={0.35} />
           </div>
 
         </div>
