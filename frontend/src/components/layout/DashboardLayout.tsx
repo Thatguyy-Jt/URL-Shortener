@@ -14,25 +14,25 @@ export function DashboardLayout({ children, title, actions }: DashboardLayoutPro
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-surface-50">
+    <div className="min-h-screen bg-surface-900">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Main content — offset by sidebar width on desktop */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 h-16 bg-white border-b border-surface-200 flex items-center justify-between px-6 gap-4 shrink-0">
+        <header className="sticky top-0 z-20 h-16 bg-surface-900 border-b border-white/8 flex items-center justify-between px-6 gap-4 shrink-0">
           <div className="flex items-center gap-4">
             {/* Mobile hamburger */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-surface-500 hover:text-surface-900 hover:bg-surface-100 transition-colors"
+              className="lg:hidden p-2 rounded-xl text-white/40 hover:text-white hover:bg-white/8 transition-colors"
               aria-label="Open sidebar"
             >
               <Menu size={20} />
             </button>
 
             {title && (
-              <h1 className="text-lg font-semibold text-surface-900 truncate">{title}</h1>
+              <h1 className="text-lg font-semibold text-white truncate">{title}</h1>
             )}
           </div>
 

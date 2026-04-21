@@ -43,15 +43,15 @@ function StatCard({ icon: Icon, label, value, sub, iconBg, iconColor, delay = 0 
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4"
+      className="bg-surface-800 rounded-2xl border border-white/8 p-5 flex items-center gap-4"
     >
       <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
         <Icon size={20} className={iconColor} />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-surface-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-surface-900 leading-none">{value}</p>
-        {sub && <p className="text-xs text-surface-400 mt-1 truncate max-w-[140px]">{sub}</p>}
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-white leading-none">{value}</p>
+        {sub && <p className="text-xs text-white/30 mt-1 truncate max-w-[140px]">{sub}</p>}
       </div>
     </motion.div>
   );
@@ -83,15 +83,15 @@ function ClicksChart({ data }: { data: { date: string; count: number }[] }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm"
+      className="bg-surface-800 rounded-2xl border border-white/8 p-6"
     >
-      <h3 className="text-sm font-semibold text-surface-900 mb-5">Clicks over time (30 days)</h3>
+      <h3 className="text-sm font-semibold text-white mb-5">Clicks over time (30 days)</h3>
 
       {!hasData ? (
         <div className="flex flex-col items-center justify-center h-48 text-center">
-          <TrendingUp size={28} className="text-surface-200 mb-3" />
-          <p className="text-sm text-surface-400">No clicks recorded yet.</p>
-          <p className="text-xs text-surface-300 mt-1">Share your link to start tracking.</p>
+          <TrendingUp size={28} className="text-white/25 mb-3" />
+          <p className="text-sm text-white/40">No clicks recorded yet.</p>
+          <p className="text-xs text-white/25 mt-1">Share your link to start tracking.</p>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={220}>
@@ -102,18 +102,18 @@ function ClicksChart({ data }: { data: { date: string; count: number }[] }) {
                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
             <XAxis
               dataKey="date"
               tickFormatter={fmt}
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)' }}
               tickLine={false}
               axisLine={false}
               interval={4}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: 'rgba(255,255,255,0.35)' }}
               tickLine={false}
               axisLine={false}
             />
@@ -154,12 +154,12 @@ function BreakdownChart({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl border border-surface-200 p-6 shadow-sm"
+      className="bg-surface-800 rounded-2xl border border-white/8 p-6"
     >
-      <h3 className="text-sm font-semibold text-surface-900 mb-5">{title}</h3>
+      <h3 className="text-sm font-semibold text-white mb-5">{title}</h3>
 
       {top.length === 0 ? (
-        <div className="flex items-center justify-center h-36 text-sm text-surface-300">
+        <div className="flex items-center justify-center h-36 text-sm text-white/25">
           No data yet
         </div>
       ) : (
@@ -167,14 +167,14 @@ function BreakdownChart({
           {top.map((item, i) => (
             <div key={item.name} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-surface-700 font-medium truncate max-w-[60%]">
+                <span className="text-white/70 font-medium truncate max-w-[60%]">
                   {item.name || 'Unknown'}
                 </span>
-                <span className="text-surface-400 tabular-nums">
+                <span className="text-white/35 tabular-nums">
                   {item.count.toLocaleString()} · {pct(item.count, total)}
                 </span>
               </div>
-              <div className="h-1.5 rounded-full bg-surface-100 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: pct(item.count, total) }}
@@ -196,13 +196,13 @@ function BreakdownChart({
 function AnalyticsSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
-      <div className="h-20 bg-white rounded-2xl border border-surface-100" />
+      <div className="h-20 bg-surface-800 rounded-2xl border border-white/8" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[1,2,3,4].map(i => <div key={i} className="h-24 bg-white rounded-2xl border border-surface-100" />)}
+        {[1,2,3,4].map(i => <div key={i} className="h-24 bg-surface-800 rounded-2xl border border-white/8" />)}
       </div>
-      <div className="h-64 bg-white rounded-2xl border border-surface-100" />
+      <div className="h-64 bg-surface-800 rounded-2xl border border-white/8" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1,2,3].map(i => <div key={i} className="h-52 bg-white rounded-2xl border border-surface-100" />)}
+        {[1,2,3].map(i => <div key={i} className="h-52 bg-surface-800 rounded-2xl border border-white/8" />)}
       </div>
     </div>
   );
@@ -237,7 +237,7 @@ export function Analytics() {
       actions={
         <button
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-1.5 text-sm text-surface-500 hover:text-surface-900 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors"
         >
           <ArrowLeft size={15} />
           Back to links
@@ -249,8 +249,8 @@ export function Analytics() {
       {isError && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <AlertCircle size={32} className="text-red-400 mb-3" />
-          <p className="text-sm font-medium text-surface-700 mb-1">Failed to load analytics</p>
-          <p className="text-sm text-surface-400">Make sure you own this link and try again.</p>
+          <p className="text-sm font-medium text-white/70 mb-1">Failed to load analytics</p>
+          <p className="text-sm text-white/35">Make sure you own this link and try again.</p>
         </div>
       )}
 
@@ -263,8 +263,8 @@ export function Analytics() {
               icon={MousePointerClick}
               label="Total clicks"
               value={total.toLocaleString()}
-              iconBg="bg-brand-50"
-              iconColor="text-brand-500"
+              iconBg="bg-brand-500/15"
+              iconColor="text-brand-400"
               delay={0}
             />
             <StatCard
@@ -272,8 +272,8 @@ export function Analytics() {
               label="Peak day"
               value={peakDay?.count ?? 0}
               sub={peakDay?.date ? fmt(peakDay.date) : 'No data'}
-              iconBg="bg-emerald-50"
-              iconColor="text-emerald-500"
+              iconBg="bg-emerald-500/15"
+              iconColor="text-emerald-400"
               delay={0.06}
             />
             <StatCard
@@ -281,8 +281,8 @@ export function Analytics() {
               label="Top device"
               value={topDevice}
               sub={devices[0] ? `${devices[0].count} clicks` : undefined}
-              iconBg="bg-violet-50"
-              iconColor="text-violet-500"
+              iconBg="bg-violet-500/15"
+              iconColor="text-violet-400"
               delay={0.12}
             />
           </div>

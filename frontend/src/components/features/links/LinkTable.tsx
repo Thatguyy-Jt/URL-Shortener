@@ -69,7 +69,7 @@ function LinkRow({ link }: { link: Link }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.25 }}
-      className="group bg-white border border-surface-200 rounded-2xl px-5 py-4 hover:border-brand-200 hover:shadow-md transition-all duration-200"
+      className="group bg-surface-800 border border-white/8 rounded-2xl px-5 py-4 hover:border-brand-500/30 hover:bg-surface-700 transition-all duration-200"
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
 
@@ -81,7 +81,7 @@ function LinkRow({ link }: { link: Link }) {
               href={shortUrl(link.slug)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-brand-600 hover:text-brand-700 font-mono flex items-center gap-1 transition-colors"
+              className="text-sm font-semibold text-brand-400 hover:text-brand-300 font-mono flex items-center gap-1 transition-colors"
             >
               {link.slug}
               <ExternalLink size={11} className="opacity-50" />
@@ -91,7 +91,7 @@ function LinkRow({ link }: { link: Link }) {
             <button
               onClick={handleCopy}
               title="Copy short link"
-              className="p-1 rounded-md text-surface-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+              className="p-1 rounded-md text-white/30 hover:text-brand-400 hover:bg-brand-500/10 transition-colors"
             >
               {copied
                 ? <Check size={13} className="text-emerald-500" />
@@ -110,7 +110,7 @@ function LinkRow({ link }: { link: Link }) {
 
           {/* Original URL */}
           <p
-            className="text-xs text-surface-400 truncate"
+            className="text-xs text-white/35 truncate"
             title={link.originalUrl}
           >
             {truncate(link.originalUrl)}
@@ -121,14 +121,14 @@ function LinkRow({ link }: { link: Link }) {
         <div className="flex items-center gap-4 shrink-0">
           {/* Clicks */}
           <div className="text-center hidden sm:block">
-            <p className="text-lg font-bold text-surface-900 leading-none">
+            <p className="text-lg font-bold text-white leading-none">
               {link.clickCount.toLocaleString()}
             </p>
-            <p className="text-[10px] text-surface-400 mt-0.5">clicks</p>
+            <p className="text-[10px] text-white/30 mt-0.5">clicks</p>
           </div>
 
           {/* Created date */}
-          <p className="text-xs text-surface-400 hidden md:block w-14 text-right">
+          <p className="text-xs text-white/30 hidden md:block w-14 text-right">
             {timeAgo(link.createdAt)}
           </p>
 
@@ -138,7 +138,7 @@ function LinkRow({ link }: { link: Link }) {
             <button
               onClick={() => navigate(`/dashboard/links/${link._id}/analytics`)}
               title="View analytics"
-              className="p-2 rounded-xl text-surface-400 hover:text-brand-500 hover:bg-brand-50 transition-colors"
+              className="p-2 rounded-xl text-white/30 hover:text-brand-400 hover:bg-brand-500/10 transition-colors"
             >
               <BarChart2 size={15} />
             </button>
@@ -148,7 +148,7 @@ function LinkRow({ link }: { link: Link }) {
               onClick={() => deactivate.mutate(link._id)}
               disabled={deactivate.isPending || !link.isActive}
               title={link.isActive ? 'Deactivate link' : 'Already inactive'}
-              className="p-2 rounded-xl text-surface-400 hover:text-amber-500 hover:bg-amber-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-2 rounded-xl text-white/30 hover:text-amber-400 hover:bg-amber-500/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {deactivate.isPending
                 ? <RefreshCw size={15} className="animate-spin" />
@@ -164,7 +164,7 @@ function LinkRow({ link }: { link: Link }) {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  className="flex items-center gap-1.5 bg-red-50 border border-red-200 rounded-xl px-2 py-1"
+                  className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-xl px-2 py-1"
                 >
                   <AlertTriangle size={12} className="text-red-500 shrink-0" />
                   <span className="text-[11px] text-red-600 font-medium">Delete?</span>
@@ -189,7 +189,7 @@ function LinkRow({ link }: { link: Link }) {
                   exit={{ opacity: 0 }}
                   onClick={() => setConfirmDel(true)}
                   title="Delete link"
-                  className="p-2 rounded-xl text-surface-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  className="p-2 rounded-xl text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors"
                 >
                   <Trash2 size={15} />
                 </motion.button>
@@ -206,14 +206,14 @@ function LinkRow({ link }: { link: Link }) {
 
 function LinkSkeleton() {
   return (
-    <div className="bg-white border border-surface-200 rounded-2xl px-5 py-4 animate-pulse">
+    <div className="bg-surface-800 border border-white/8 rounded-2xl px-5 py-4 animate-pulse">
       <div className="flex items-center gap-3">
-        <div className="flex-1 space-y-2">
-          <div className="h-4 bg-surface-100 rounded w-32" />
-          <div className="h-3 bg-surface-100 rounded w-64" />
+          <div className="flex-1 space-y-2">
+          <div className="h-4 bg-white/8 rounded w-32" />
+          <div className="h-3 bg-white/8 rounded w-64" />
         </div>
-        <div className="h-8 w-24 bg-surface-100 rounded-xl hidden sm:block" />
-        <div className="h-8 w-20 bg-surface-100 rounded-xl hidden md:block" />
+        <div className="h-8 w-24 bg-white/8 rounded-xl hidden sm:block" />
+        <div className="h-8 w-20 bg-white/8 rounded-xl hidden md:block" />
       </div>
     </div>
   );
@@ -239,13 +239,13 @@ export function LinkTable({ links, isLoading, emptyMessage }: LinkTableProps) {
   if (links.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-surface-100 flex items-center justify-center mb-4">
-          <ExternalLink size={24} className="text-surface-300" />
+        <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/8 flex items-center justify-center mb-4">
+          <ExternalLink size={24} className="text-white/20" />
         </div>
-        <p className="text-sm font-medium text-surface-700 mb-1">
+        <p className="text-sm font-medium text-white/60 mb-1">
           {emptyMessage ?? 'No links yet'}
         </p>
-        <p className="text-sm text-surface-400">
+        <p className="text-sm text-white/30">
           Create your first short link to get started.
         </p>
       </div>

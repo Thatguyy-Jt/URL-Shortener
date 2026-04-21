@@ -26,15 +26,15 @@ function StatCard({ icon: Icon, label, value, sub, iconBg, iconColor, delay = 0 
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="bg-white rounded-2xl border border-surface-200 p-5 shadow-sm flex items-center gap-4"
+      className="bg-surface-800 rounded-2xl border border-white/8 p-5 flex items-center gap-4"
     >
       <div className={`w-11 h-11 rounded-xl ${iconBg} flex items-center justify-center shrink-0`}>
         <Icon size={20} className={iconColor} />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-surface-400 mb-1">{label}</p>
-        <p className="text-2xl font-bold text-surface-900 leading-none">{value}</p>
-        {sub && <p className="text-xs text-surface-400 mt-1">{sub}</p>}
+        <p className="text-xs font-semibold uppercase tracking-widest text-white/40 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-white leading-none">{value}</p>
+        {sub && <p className="text-xs text-white/30 mt-1">{sub}</p>}
       </div>
     </motion.div>
   );
@@ -75,8 +75,8 @@ export function Dashboard() {
           label="Total links"
           value={total.toLocaleString()}
           sub="across all pages"
-          iconBg="bg-brand-50"
-          iconColor="text-brand-500"
+          iconBg="bg-brand-500/15"
+          iconColor="text-brand-400"
           delay={0}
         />
         <StatCard
@@ -84,8 +84,8 @@ export function Dashboard() {
           label="Total clicks"
           value={totalClicks.toLocaleString()}
           sub="on this page"
-          iconBg="bg-emerald-50"
-          iconColor="text-emerald-500"
+          iconBg="bg-emerald-500/15"
+          iconColor="text-emerald-400"
           delay={0.07}
         />
         <StatCard
@@ -93,8 +93,8 @@ export function Dashboard() {
           label="Active links"
           value={activeLinks.toLocaleString()}
           sub="on this page"
-          iconBg="bg-amber-50"
-          iconColor="text-amber-500"
+          iconBg="bg-amber-500/15"
+          iconColor="text-amber-400"
           delay={0.14}
         />
       </div>
@@ -108,9 +108,9 @@ export function Dashboard() {
         {/* Section header */}
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-base font-semibold text-surface-900">Your links</h2>
+            <h2 className="text-base font-semibold text-white">Your links</h2>
             {!isLoading && (
-              <p className="text-sm text-surface-400 mt-0.5">
+              <p className="text-sm text-white/40 mt-0.5">
                 {total === 0
                   ? 'No links yet'
                   : `${total} link${total === 1 ? '' : 's'} total`}
@@ -120,20 +120,20 @@ export function Dashboard() {
           {/* Pagination controls */}
           {totalPages > 1 && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-surface-500">
+              <span className="text-sm text-white/40">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1.5 rounded-lg text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={16} />
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-lg text-surface-400 hover:text-surface-700 hover:bg-surface-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight size={16} />
               </button>
@@ -142,7 +142,7 @@ export function Dashboard() {
         </div>
 
         {isError ? (
-          <div className="py-12 text-center text-sm text-red-500">
+          <div className="py-12 text-center text-sm text-red-400">
             Failed to load links. Please refresh the page.
           </div>
         ) : (
