@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  ArrowLeft, MousePointerClick, Globe, Smartphone,
+  ArrowLeft, MousePointerClick, Smartphone,
   TrendingUp, AlertCircle,
 } from 'lucide-react';
 import {
@@ -226,9 +226,8 @@ export function Analytics() {
     name: e.browser, count: e.count,
   }));
 
-  const total      = data?.totalClicks ?? 0;
-  const topCountry = countries[0]?.name ?? '—';
-  const topDevice  = devices[0]?.name   ?? '—';
+  const total     = data?.totalClicks ?? 0;
+  const topDevice = devices[0]?.name  ?? '—';
   const peakDay    = data?.clicksOverTime
     .reduce((best, d) => (d.count > best.count ? d : best), { date: '', count: 0 });
 
@@ -259,7 +258,7 @@ export function Analytics() {
         <div className="space-y-6 max-w-6xl">
 
           {/* ── Stat cards ── */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <StatCard
               icon={MousePointerClick}
               label="Total clicks"
@@ -278,22 +277,13 @@ export function Analytics() {
               delay={0.06}
             />
             <StatCard
-              icon={Globe}
-              label="Top country"
-              value={topCountry}
-              sub={countries[0] ? `${countries[0].count} clicks` : undefined}
-              iconBg="bg-sky-50"
-              iconColor="text-sky-500"
-              delay={0.12}
-            />
-            <StatCard
               icon={Smartphone}
               label="Top device"
               value={topDevice}
               sub={devices[0] ? `${devices[0].count} clicks` : undefined}
               iconBg="bg-violet-50"
               iconColor="text-violet-500"
-              delay={0.18}
+              delay={0.12}
             />
           </div>
 

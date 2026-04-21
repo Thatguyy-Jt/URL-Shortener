@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import CountUp from 'react-countup';
 import {
@@ -28,6 +28,7 @@ const stagger = {
 function HeroSection() {
   const [url, setUrl] = useState('');
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
   const fakeShort = 'snip.ly/k7Xm2p';
 
   function handleCopy() {
@@ -35,6 +36,11 @@ function HeroSection() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  function handleShorten(e: React.FormEvent) {
+    e.preventDefault();
+    navigate('/login');
   }
 
   return (
@@ -71,7 +77,8 @@ function HeroSection() {
         </motion.p>
 
         {/* URL input */}
-        <motion.div
+        <motion.form
+          onSubmit={handleShorten}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -84,10 +91,10 @@ function HeroSection() {
             placeholder="Paste your long URL here..."
             className="flex-1 h-12 rounded-xl px-4 text-sm bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent backdrop-blur-sm transition"
           />
-          <Button size="lg" className="shrink-0 h-12">
+          <Button type="submit" size="lg" className="shrink-0 h-12">
             Shorten it <ArrowRight size={16} />
           </Button>
-        </motion.div>
+        </motion.form>
 
         {/* Demo output */}
         <motion.div
