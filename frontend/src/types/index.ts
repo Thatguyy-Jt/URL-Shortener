@@ -20,20 +20,21 @@ export interface Link {
 
 export interface ClicksOverTimePoint {
   date: string;   // 'YYYY-MM-DD'
-  clicks: number;
+  count: number;  // backend field name is 'count'
 }
 
-// Each breakdown uses the field name the backend actually sends
-export interface CountryEntry  { country: string; clicks: number; }
-export interface DeviceEntry   { device:  string; clicks: number; }
-export interface BrowserEntry  { browser: string; clicks: number; }
+// Each breakdown uses the exact field names the backend sends
+export interface CountryEntry  { country: string; count: number; }
+export interface DeviceEntry   { device:  string; count: number; }
+export interface BrowserEntry  { browser: string; count: number; }
 
 export interface LinkAnalytics {
-  totalClicks: number;
-  clicksOverTime:    ClicksOverTimePoint[];
-  countryBreakdown:  CountryEntry[];
-  deviceBreakdown:   DeviceEntry[];
-  browserBreakdown:  BrowserEntry[];
+  totalClicks:   number;
+  uniqueClicks:  number;
+  clicksOverTime: ClicksOverTimePoint[];
+  countries:  CountryEntry[];   // backend key: 'countries'
+  devices:    DeviceEntry[];    // backend key: 'devices'
+  browsers:   BrowserEntry[];   // backend key: 'browsers'
 }
 
 // ── API response wrappers ──────────────────────────────────────────────────────

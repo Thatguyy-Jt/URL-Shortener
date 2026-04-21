@@ -68,15 +68,15 @@ function AreaTooltip({ active, payload, label }: {
   return (
     <div className="bg-surface-900 text-white text-xs rounded-xl px-3 py-2 shadow-xl">
       <p className="font-semibold mb-0.5">{label && fmt(label)}</p>
-      <p className="text-brand-300">{payload[0].value.toLocaleString()} clicks</p>
+      <p className="text-brand-300">{payload[0].value?.toLocaleString()} clicks</p>
     </div>
   );
 }
 
 /* ─── Clicks over time chart ─────────────────────────────────────────────── */
 
-function ClicksChart({ data }: { data: { date: string; clicks: number }[] }) {
-  const hasData = data.some((d) => d.clicks > 0);
+function ClicksChart({ data }: { data: { date: string; count: number }[] }) {
+  const hasData = data.some((d) => d.count > 0);
 
   return (
     <motion.div
@@ -120,7 +120,7 @@ function ClicksChart({ data }: { data: { date: string; clicks: number }[] }) {
             <Tooltip content={<AreaTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }} />
             <Area
               type="monotone"
-              dataKey="clicks"
+              dataKey="count"
               stroke="#6366f1"
               strokeWidth={2.5}
               fill="url(#clickGrad)"
@@ -143,7 +143,7 @@ function BreakdownChart({
   delay = 0,
 }: {
   title: string;
-  data: { name: string; clicks: number }[];
+  data: { name: string; count: number }[];
   total: number;
   delay?: number;
 }) {
@@ -171,13 +171,13 @@ function BreakdownChart({
                   {item.name || 'Unknown'}
                 </span>
                 <span className="text-surface-400 tabular-nums">
-                  {item.clicks.toLocaleString()} · {pct(item.clicks, total)}
+                  {item.count.toLocaleString()} · {pct(item.count, total)}
                 </span>
               </div>
               <div className="h-1.5 rounded-full bg-surface-100 overflow-hidden">
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: pct(item.clicks, total) }}
+                  animate={{ width: pct(item.count, total) }}
                   transition={{ duration: 0.7, delay: delay + i * 0.05, ease: 'easeOut' }}
                   className="h-full rounded-full"
                   style={{ backgroundColor: BRAND_COLORS[i % BRAND_COLORS.length] }}
@@ -215,22 +215,22 @@ export function Analytics() {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useAnalytics(id);
 
-  // Normalise breakdown arrays to { name, clicks }
-  const countries = (data?.countryBreakdown ?? []).map((e: CountryEntry) => ({
-    name: e.country, clicks: e.clicks,
+  // Normalise breakdown arrays to { name, count }
+  const countries = (data?.countries ?? []).map((e: CountryEntry) => ({
+    name: e.country, count: e.count,
   }));
-  const devices = (data?.deviceBreakdown ?? []).map((e: DeviceEntry) => ({
-    name: e.device, clicks: e.clicks,
+  const devices = (data?.devices ?? []).map((e: DeviceEntry) => ({
+    name: e.device, count: e.count,
   }));
-  const browsers = (data?.browserBreakdown ?? []).map((e: BrowserEntry) => ({
-    name: e.browser, clicks: e.clicks,
+  const browsers = (data?.browsers ?? []).map((e: BrowserEntry) => ({
+    name: e.browser, count: e.count,
   }));
 
-  const total     = data?.totalClicks ?? 0;
+  const total      = data?.totalClicks ?? 0;
   const topCountry = countries[0]?.name ?? '—';
   const topDevice  = devices[0]?.name   ?? '—';
   const peakDay    = data?.clicksOverTime
-    .reduce((best, d) => (d.clicks > best.clicks ? d : best), { date: '', clicks: 0 });
+    .reduce((best, d) => (d.count > best.count ? d : best), { date: '', count: 0 });
 
   return (
     <DashboardLayout
@@ -271,7 +271,7 @@ export function Analytics() {
             <StatCard
               icon={TrendingUp}
               label="Peak day"
-              value={peakDay?.clicks ?? 0}
+              value={peakDay?.count ?? 0}
               sub={peakDay?.date ? fmt(peakDay.date) : 'No data'}
               iconBg="bg-emerald-50"
               iconColor="text-emerald-500"
@@ -281,7 +281,7 @@ export function Analytics() {
               icon={Globe}
               label="Top country"
               value={topCountry}
-              sub={countries[0] ? `${countries[0].clicks} clicks` : undefined}
+              sub={countries[0] ? `${countries[0].count} clicks` : undefined}
               iconBg="bg-sky-50"
               iconColor="text-sky-500"
               delay={0.12}
@@ -290,7 +290,7 @@ export function Analytics() {
               icon={Smartphone}
               label="Top device"
               value={topDevice}
-              sub={devices[0] ? `${devices[0].clicks} clicks` : undefined}
+              sub={devices[0] ? `${devices[0].count} clicks` : undefined}
               iconBg="bg-violet-50"
               iconColor="text-violet-500"
               delay={0.18}
