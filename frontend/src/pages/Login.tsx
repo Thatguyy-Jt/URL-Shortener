@@ -37,7 +37,7 @@ export function Login() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-surface-900 mb-1">Welcome back</h1>
         <p className="text-sm text-surface-500">
-          Sign in to your Sniply account.
+          Sign in to your Sniplly account.
         </p>
       </div>
 

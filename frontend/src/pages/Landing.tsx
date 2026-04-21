@@ -285,8 +285,8 @@ function FeaturesSection() {
 /* ─── Section: How it works ──────────────────────────────────────────────── */
 
 const STEPS = [
-  { number: '01', title: 'Paste your URL', description: 'Drop any long link into Sniply — no sign-up required to start.' },
-  { number: '02', title: 'Customize your slug', description: 'Create a branded alias or let Sniply generate one for you instantly.' },
+  { number: '01', title: 'Paste your URL', description: 'Drop any long link into Sniplly — no sign-up required to start.' },
+  { number: '02', title: 'Customize your slug', description: 'Create a branded alias or let Sniplly generate one for you instantly.' },
   { number: '03', title: 'Share your short link', description: 'Share via social, email, QR code — anywhere your audience is.' },
   { number: '04', title: 'Watch clicks roll in', description: 'Open your dashboard and see real-time analytics: countries, devices, trends.' },
 ];
@@ -369,7 +369,7 @@ function CTASection() {
               Ready to make your links work harder?
             </h2>
             <p className="text-white/60 text-lg mb-8 max-w-xl mx-auto">
-              Join thousands of teams already using Sniply to track every click, understand every audience, and optimize every campaign.
+              Join thousands of teams already using Sniplly to track every click, understand every audience, and optimize every campaign.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link to="/register">

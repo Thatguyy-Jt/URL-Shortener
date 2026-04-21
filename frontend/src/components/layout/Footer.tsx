@@ -112,7 +112,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8">
           <p className="text-sm text-white/40">
-            © {new Date().getFullYear()} Sniply. All rights reserved.
+            © {new Date().getFullYear()} Sniplly. All rights reserved.
           </p>
           <p className="text-sm text-white/40">
             Made with care for the web.

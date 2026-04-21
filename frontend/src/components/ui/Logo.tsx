@@ -3,15 +3,11 @@ import { motion } from 'framer-motion';
 import { cn } from '../../lib/cn';
 
 /**
- * Sniply brand mark.
+ * Sniplly wordmark logo.
  *
- * The PNG logo (1024×571) has the S icon centred horizontally in the top
- * ~65 % of the image.  We display it in a square container using
- * object-cover + object-position so only the S glyph is visible — then
- * render the wordmark "Sniply" as type alongside it.
- *
- * variant="light"  → white wordmark  (navbar on dark/transparent bg)
- * variant="dark"   → dark wordmark   (navbar on white bg, footer light panels)
+ * Uses Space Grotesk (800 weight) for a distinctive geometric brand feel.
+ * variant="light"  → gradient wordmark (on dark backgrounds)
+ * variant="dark"   → brand-colored wordmark (on light backgrounds)
  */
 
 interface LogoProps {
@@ -21,38 +17,24 @@ interface LogoProps {
 }
 
 export function Logo({ variant = 'light', size = 'md', className }: LogoProps) {
-  const markSize  = size === 'sm' ? 'w-7 h-7'  : 'w-9 h-9';
-  const textSize  = size === 'sm' ? 'text-base' : 'text-[1.15rem]';
-  const textColor = variant === 'light' ? 'text-white' : 'text-surface-900';
+  const textSize = size === 'sm' ? 'text-xl' : 'text-2xl';
 
   return (
-    <Link to="/" className={cn('flex items-center gap-2.5 group', className)}>
-      <motion.div
-        whileHover={{ scale: 1.06 }}
-        transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+    <Link to="/" className={cn('group select-none', className)}>
+      <motion.span
+        whileHover={{ scale: 1.03 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800 }}
         className={cn(
-          markSize,
-          'rounded-xl overflow-hidden shrink-0 ring-1 ring-black/8 shadow-md',
+          'leading-none tracking-tight inline-block',
+          textSize,
+          variant === 'light'
+            ? 'text-transparent bg-clip-text bg-gradient-to-r from-white via-brand-200 to-brand-400'
+            : 'text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400',
         )}
       >
-        {/*
-          object-cover fills the square container.
-          The image is landscape (1024×571); scaling to container height shows
-          the full height but crops the sides.  The S icon sits at roughly
-          50 % horizontally and 42 % vertically — object-position centres it.
-        */}
-        <img
-          src="/logo.jpg"
-          alt="Sniply logo mark"
-          className="w-full h-full object-cover object-[center_35%]"
-          draggable={false}
-        />
-      </motion.div>
-
-      {/* Wordmark */}
-      <span className={cn('font-extrabold tracking-tight leading-none select-none', textSize, textColor)}>
-        Sniply
-      </span>
+        Sniplly
+      </motion.span>
     </Link>
   );
 }
